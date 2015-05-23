@@ -194,3 +194,13 @@ FakesAssemblies/
 
 # Visual Studio 6 workspace options file
 *.opt
+Debug/SeamCarving.exe
+Debug/SeamCarving.ilk
+Debug/SeamCarving.pdb
+SeamCarving.v12.suo
+SeamCarving/Debug/main.obj
+SeamCarving/Debug/SeamCarver.obj
+SeamCarving/Debug/SeamCarving.log
+SeamCarving/Debug/SeamCarving.tlog/CL.write.1.tlog
+SeamCarving/Debug/vc120.idb
+SeamCarving/Debug/vc120.pdb
