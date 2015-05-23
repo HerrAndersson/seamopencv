@@ -3,8 +3,15 @@
 
 int main() 
 {
-	string str = "towerMedium.png";
-	Mat_<Vec3b> image = imread(str);
+	string name = "towerMedium";
+	string c = "_carved";
+	string ext = ".png";
+	Mat_<Vec3b> image = imread(name + ext);
+	vector<int> seam;
+
+	int horizontal = 50;
+	int vertical = 50;
+	bool done = false;
 
 	if (!image.data) 
 	{
@@ -15,36 +22,32 @@ int main()
 
 	imshow("Original Image", image);
 	SeamCarver s(image);
-	s.ShowEnergy();
+	//s.ShowEnergy();
 
-	//for (int i = 0; i < 5; ++i)
-	//{
-	//	vector<int> seam = s.FindHorizontalSeam();
-	//	s.ShowHorizontalSeam(seam);
-	//	s.RemoveHorizontalSeam(seam);
-	//}
-	//for (int i = 0; i < 5; ++i) 
-	//{
-	//	vector<int> seam = s.FindVerticalSeam();
-	//	s.ShowVerticalSeam(seam);
+	while (waitKey(20) != 27 || !done)
+	{
+		if (horizontal > 0)
+		{
+			seam = s.FindHorizontalSeam();
+			s.ShowHorizontalSeam(seam);
+			s.RemoveHorizontalSeam(seam);
+			horizontal--;
+		}
+		else if (vertical > 0)
+		{
+			seam = s.FindVerticalSeam();
+			s.ShowVerticalSeam(seam);
+			s.RemoveVerticalSeam(seam);
+			vertical--;
+		}
 
-	//	Mat tmp;
-	//	image.copyTo(tmp);
+		if (horizontal <= 0 || vertical <= 0)
+			done = true;
+	}
 
-	//	for (int i = 0; i < tmp.rows; ++i)
-	//	{
-	//		tmp.at<Vec3b>(i, seam[i]) = Vec3b(0, 0, 255);	//Set the color of the seam to Red
-	//	}
-
-	//	imshow("Seam", tmp);
-	//	tmp.release();
-	//	s.RemoveVerticalSeam(seam);
-	//}
 	imshow("Carved Image", s.GetImage());
 
-	while (waitKey(20) != 27);
-
-//	imwrite("bench_carved.jpg", s.getImage());
+	imwrite(name + c + ext, s.GetImage());
 
 	image.release();
 	return 0;
