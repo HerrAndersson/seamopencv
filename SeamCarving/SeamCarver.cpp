@@ -107,9 +107,9 @@ void SeamCarver::ComputeEnergyAfterSeamRemoval(vector<int> seam)
 {
 	Mat tmp = Mat(image.rows, image.cols, CV_32S, Scalar(195075));
 
-	for (unsigned int row = 0; row < (int)image.rows; ++row)
+	for (int row = 0; row < (int)image.rows; ++row)
 	{
-		for (unsigned int col = 0; col < (int)image.cols; ++col)
+		for (int col = 0; col < (int)image.cols; ++col)
 		{
 			if (col < seam[row] - 1)
 				tmp.at<int>(row, col) = energy.at<int>(row, col);
@@ -136,26 +136,18 @@ void SeamCarver::ComputeEnergyAfterSeamRemoval(vector<int> seam)
 
 vector<int> SeamCarver::FindVerticalSeam()
 {
-	vector<int> seam;// (image.rows);
-	seam.resize(image.rows);
 	const int r = image.rows;
 	const int c = image.cols;
 
-	vector<vector<int>> distTo;
-	distTo.resize(c);
-	for each (vector<int> x in distTo)
-	{
-		x.resize(r);
-	}
-	vector<vector<short>> edgeTo;
-	edgeTo.resize(c);
-	for each (vector<short> x in edgeTo)
-	{
-		x.resize(r);
-	}
+	int* seam = new int[r];
 
-	//unsigned int distTo[r][c];	//Save the shortest distance from any of the top pixels
-	//short edgeTo[r][c];			//Which of the the three top pixels, the shortest path came from
+	unsigned int** distTo = new unsigned int*[r];
+	for (int i = 0; i < r; i++)
+		distTo[i] = new unsigned int[c];
+
+	short** edgeTo = new short*[r];
+	for (int i = 0; i < r; i++)
+		edgeTo[i] = new short[c];
 
 	//Initialize the distance and edge matrices
 	for (int i = 0; i < image.rows; ++i) 
@@ -221,7 +213,22 @@ vector<int> SeamCarver::FindVerticalSeam()
 		seam[i - 1] = seam[i] + edgeTo[i][seam[i]];
 	}
 
-	return seam;
+
+	for (int i = 0; i < r; i++)
+		delete distTo[i];
+	delete[] distTo;
+
+	for (int i = 0; i < r; i++)
+		delete edgeTo[i];
+	delete[] edgeTo;
+
+	vector<int> s;
+	for (int i = 0; i < r; i++)
+		s.push_back(seam[i]);
+
+	delete[] seam;
+
+	return s;
 }
 
 void SeamCarver::RemoveVerticalSeam(vector<int> seam)
