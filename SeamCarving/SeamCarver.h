@@ -10,11 +10,9 @@ using namespace std;
 class SeamCarver
 {
 	Mat_<Vec3b> image;
-	Mat_<Vec3b> duplicate;
 	Mat energy;
 
 	void ComputeFullEnergy();
-	void ComputeEnergyAfterSeamRemoval(vector<int> seam);
 
 public:
 
@@ -38,6 +36,8 @@ public:
 
 	void ShowVerticalSeam(vector<int> seam);
 	void ShowHorizontalSeam(vector<int> seam);
+
+	void ShowSeam(vector<int> seam, int length);
 };
 
-#endif /* SEAMCARVER_H_ */
+#endif

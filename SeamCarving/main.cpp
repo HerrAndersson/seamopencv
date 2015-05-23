@@ -22,7 +22,7 @@ int main()
 
 	imshow("Original Image", image);
 	SeamCarver s(image);
-	//s.ShowEnergy();
+	s.ShowEnergy();
 
 	while (waitKey(20) != 27 || !done)
 	{
