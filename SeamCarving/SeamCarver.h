@@ -10,6 +10,7 @@ using namespace std;
 class SeamCarver
 {
 	Mat_<Vec3b> image;
+	Mat_<Vec3b> duplicate;
 	Mat energy;
 
 	void ComputeFullEnergy();

@@ -12,8 +12,6 @@ int main()
 
 	Mat_<Vec3b> image = imread(name + type);
 
-	int horizontal = 1;
-	int vertical = 350;
 	bool done = false;
 
 	if (!image.data) 
@@ -28,15 +26,41 @@ int main()
 	s.ShowEnergy();
 	//s.SaveEnergy(name + ext1 + ext2 + type);
 
+
+	int horizontal = 10;
+	int vertical = 350;
+	//for (int i = 0; i < horizontal; i++)
+	//{
+	//	vector<int> seam = s.FindHorizontalSeam();
+	//	s.RemoveHorizontalSeam(seam);
+	//}
+
+	//for (int i = 0; i < vertical; i++)
+	//{
+	//	vector<int> seam2 = s.FindVerticalSeam();
+	//	s.RemoveVerticalSeam(seam2);
+	//}
+
+	/*while (waitKey(20) != 27)*/
 	while (waitKey(20) != 27)
 	{
-		vector<int> seam = s.FindHorizontalSeam();
-		s.ShowHorizontalSeam(seam);
-		s.RemoveHorizontalSeam(seam);
+		//if (vertical > 0)
+		//{
+			vector<int> seam2 = s.FindVerticalSeam();
+			s.ShowVerticalSeam(seam2);
+			s.RemoveVerticalSeam(seam2);
+			waitKey(20);
+			vertical--;
+		//}
 
-		vector<int> seam2 = s.FindVerticalSeam();
-		s.ShowVerticalSeam(seam2);
-		s.RemoveVerticalSeam(seam2);
+		//if (horizontal)
+		//{
+			//vector<int> seam = s.FindHorizontalSeam();
+			//s.ShowHorizontalSeam(seam);
+			//s.RemoveHorizontalSeam(seam);
+			//waitKey(20);
+			//horizontal--;
+		//}
 	}
 
 	s.ShowImage();

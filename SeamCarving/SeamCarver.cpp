@@ -3,12 +3,14 @@
 SeamCarver::SeamCarver(Mat_<Vec3b> img)
 {
 	image = img;
+	duplicate = img;
 	energy = Mat(image.rows, image.cols, CV_32S, Scalar(195075));
 	ComputeFullEnergy();
 }
 
 SeamCarver::~SeamCarver()
 {
+	duplicate.release();
 	energy.release();
 }
 
@@ -109,23 +111,23 @@ void SeamCarver::ComputeFullEnergy()
 
 vector<int> SeamCarver::FindVerticalSeam()
 {
-	const int width = image.rows;
-	const int height = image.cols;
+	int rows = image.rows; //height
+	int cols = image.cols; //width
 
-	int* seam = new int[width];
+	int* seam = new int[rows];
 
-	unsigned int** distTo = new unsigned int*[width];
-	for (int i = 0; i < width; i++)
-		distTo[i] = new unsigned int[height];
+	unsigned int** distTo = new unsigned int*[rows];
+	for (int i = 0; i < rows; i++)
+		distTo[i] = new unsigned int[cols];
 
-	short** edgeTo = new short*[width];
-	for (int i = 0; i < width; i++)
-		edgeTo[i] = new short[height];
+	short** edgeTo = new short*[rows];
+	for (int i = 0; i < rows; i++)
+		edgeTo[i] = new short[cols];
 
 	//Initialize the distance and edge matrices
-	for (int x = 0; x < width; ++x)
+	for (int x = 0; x < rows; ++x)
 	{
-		for (int y = 0; y < height; ++y)
+		for (int y = 0; y < cols; ++y)
 		{
 			if (x == 0)
 				distTo[x][y] = 0;
@@ -136,35 +138,35 @@ vector<int> SeamCarver::FindVerticalSeam()
 		}
 	}
 
-	for (int x = 0; x < width - 1; ++x)
+	for (int row = 0; row < rows - 1; ++row)
 	{
-		for (int y = 0; y < height; ++y)
+		for (int col = 0; col < cols; ++col)
 		{
 
 			//Left
-			if (y != 0)
+			if (col != 0)
 			{
-				if (distTo[x + 1][y - 1] > distTo[x][y] + GetEnergy(x + 1, y - 1))
+				if (distTo[row + 1][col - 1] > distTo[row][col] + GetEnergy(row + 1, col - 1))
 				{
-					distTo[x + 1][y - 1] = distTo[x][y] + GetEnergy(x + 1, y - 1);
-					edgeTo[x + 1][y - 1] = 1;
+					distTo[row + 1][col - 1] = distTo[row][col] + GetEnergy(row + 1, col - 1);
+					edgeTo[row + 1][col - 1] = 1;
 				}
 			}
 
 			//Below
-			if (distTo[x + 1][y] > distTo[x][y] + GetEnergy(x + 1, y))
+			if (distTo[row + 1][col] > distTo[row][col] + GetEnergy(row + 1, col))
 			{
-				distTo[x + 1][y] = distTo[x][y] + GetEnergy(x + 1, y);
-				edgeTo[x + 1][y] = 0;
+				distTo[row + 1][col] = distTo[row][col] + GetEnergy(row + 1, col);
+				edgeTo[row + 1][col] = 0;
 			}
 
 			//Right
-			if (y != height - 1)
+			if (col != cols - 1)
 			{
-				if (distTo[x + 1][y + 1] > distTo[x][y] + GetEnergy(x + 1, y + 1))
+				if (distTo[row + 1][col + 1] > distTo[row][col] + GetEnergy(row + 1, col + 1))
 				{
-					distTo[x + 1][y + 1] = distTo[x][y] + GetEnergy(x + 1, y + 1);
-					edgeTo[x + 1][y + 1] = -1;
+					distTo[row + 1][col + 1] = distTo[row][col] + GetEnergy(row + 1, col + 1);
+					edgeTo[row + 1][col + 1] = -1;
 				}
 			}
 		}
@@ -172,40 +174,38 @@ vector<int> SeamCarver::FindVerticalSeam()
 
 	//Find the bottom of the min-path
 	unsigned int min_index = 0;
-	unsigned int min = distTo[width - 1][0];
+	unsigned int min = distTo[rows - 1][0];
 
-	for (int y = 1; y < height; ++y)
+	for (int col = 1; col < cols; ++col)
 	{
-		if (distTo[width - 1][y] < min)
+		if (distTo[rows - 1][col] < min)
 		{
-			min_index = y;
-			min = distTo[width - 1][y];
-
-			cout << min_index << " " << min << endl;
+			min_index = col;
+			min = distTo[rows - 1][col];
 		}
 	}
 
 	//Retrace the min-path and update the 'seam'
-	seam[width - 1] = min_index;
-	for (int i = width- 1; i > 0; --i)
+	seam[rows - 1] = min_index;
+	for (int i = rows- 1; i > 0; --i)
 	{
 		seam[i - 1] = seam[i] + edgeTo[i][seam[i]];
 	}
 
 	//Insert the seam in the vector
 	vector<int> s;
-	for (int i = 0; i < width; i++)
+	for (int i = 0; i < rows; i++)
 		s.push_back(seam[i]);
 
 
 	//Cleanup
 	delete[] seam;
 
-	for (int i = 0; i < width; i++)
+	for (int i = 0; i < rows; i++)
 		delete distTo[i];
 	delete[] distTo;
 
-	for (int i = 0; i < width; i++)
+	for (int i = 0; i < rows; i++)
 		delete edgeTo[i];
 	delete[] edgeTo;
 
