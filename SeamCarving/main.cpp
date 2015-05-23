@@ -11,7 +11,6 @@ int main()
 	string type = png;
 
 	Mat_<Vec3b> image = imread(name + type);
-	vector<int> seam;
 
 	int horizontal = 1;
 	int vertical = 350;
@@ -29,25 +28,15 @@ int main()
 	s.ShowEnergy();
 	//s.SaveEnergy(name + ext1 + ext2 + type);
 
-	while (waitKey(20) != 27 || !done)
+	while (waitKey(20) != 27)
 	{
-		if (horizontal > 0)
-		{
-			seam = s.FindHorizontalSeam();
-			s.ShowHorizontalSeam(seam);
-			s.RemoveHorizontalSeam(seam);
-			horizontal--;
-		}
-		else if (vertical > 0)
-		{
-			seam = s.FindVerticalSeam();
-			s.ShowVerticalSeam(seam);
-			s.RemoveVerticalSeam(seam);
-			vertical--;
-		}
+		vector<int> seam = s.FindHorizontalSeam();
+		s.ShowHorizontalSeam(seam);
+		s.RemoveHorizontalSeam(seam);
 
-		if (horizontal <= 0 || vertical <= 0)
-			done = true;
+		vector<int> seam2 = s.FindVerticalSeam();
+		s.ShowVerticalSeam(seam2);
+		s.RemoveVerticalSeam(seam2);
 	}
 
 	s.ShowImage();
