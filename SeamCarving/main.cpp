@@ -3,14 +3,18 @@
 
 int main() 
 {
-	string name = "towerMedium";
-	string c = "_carved";
-	string ext = ".png";
-	Mat_<Vec3b> image = imread(name + ext);
+	string name = "Pictures/tower";
+	string ext1 = "_carved";
+	string ext2 = "_energy";
+	string jpg = ".jpg";
+	string png = ".png";
+	string type = png;
+
+	Mat_<Vec3b> image = imread(name + type);
 	vector<int> seam;
 
-	int horizontal = 50;
-	int vertical = 50;
+	int horizontal = 1;
+	int vertical = 350;
 	bool done = false;
 
 	if (!image.data) 
@@ -23,6 +27,7 @@ int main()
 	imshow("Original Image", image);
 	SeamCarver s(image);
 	s.ShowEnergy();
+	//s.SaveEnergy(name + ext1 + ext2 + type);
 
 	while (waitKey(20) != 27 || !done)
 	{
@@ -45,9 +50,12 @@ int main()
 			done = true;
 	}
 
-	imshow("Carved Image", s.GetImage());
+	s.ShowImage();
 
-	imwrite(name + c + ext, s.GetImage());
+	while (waitKey(20) != 27);
+
+	//s.SaveEnergy(name + ext1 + ext2 + type);
+	s.SaveImage(name + ext1 + type);
 
 	image.release();
 	return 0;

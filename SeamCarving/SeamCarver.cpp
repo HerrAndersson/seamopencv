@@ -14,7 +14,7 @@ SeamCarver::~SeamCarver()
 
 void SeamCarver::ShowImage()
 {
-	imshow("Image", image);
+	imshow("Carved Image", image);
 }
 
 void SeamCarver::ShowEnergy() 
@@ -22,14 +22,14 @@ void SeamCarver::ShowEnergy()
 	imshow("Energy", energy);
 }
 
-void SeamCarver::SaveImage()
+void SeamCarver::SaveImage(string filename)
 {
-	imwrite("Image.png", image);
+	imwrite(filename, image);
 }
 
-void SeamCarver::SaveEnergy()
+void SeamCarver::SaveEnergy(string filename)
 {
-	imwrite("Energy.png", energy);
+	imwrite(filename, energy);
 }
 
 Mat_<Vec3b> SeamCarver::GetImage()
@@ -71,11 +71,11 @@ void SeamCarver::ShowHorizontalSeam(vector<int> seam)
 
 void SeamCarver::ComputeFullEnergy()
 {
-	//Sampling pattern. x-o
+	//Sampling pattern.
 	//
-	//					xxx
-	//				  oooAxxx
-	//					ooo
+	//					rgb
+	//				 rgb A rgb
+	//					rgb
 	//
 
 	energy.create(image.rows, image.cols, CV_32S);
@@ -90,7 +90,7 @@ void SeamCarver::ComputeFullEnergy()
 		for (int j = 1; j < image.cols - 1; ++j)
 		{
 			int val = 0;
-			int pos = 3 * (j - 1);
+			int pos = 3 * j;
 
 			//X-axis
 			val += (prev[pos] - next[pos]) * (prev[pos] - next[pos]);
@@ -109,99 +109,103 @@ void SeamCarver::ComputeFullEnergy()
 
 vector<int> SeamCarver::FindVerticalSeam()
 {
-	const int r = image.rows;
-	const int c = image.cols;
+	const int width = image.rows;
+	const int height = image.cols;
 
-	int* seam = new int[r];
+	int* seam = new int[width];
 
-	unsigned int** distTo = new unsigned int*[r];
-	for (int i = 0; i < r; i++)
-		distTo[i] = new unsigned int[c];
+	unsigned int** distTo = new unsigned int*[width];
+	for (int i = 0; i < width; i++)
+		distTo[i] = new unsigned int[height];
 
-	short** edgeTo = new short*[r];
-	for (int i = 0; i < r; i++)
-		edgeTo[i] = new short[c];
+	short** edgeTo = new short*[width];
+	for (int i = 0; i < width; i++)
+		edgeTo[i] = new short[height];
 
 	//Initialize the distance and edge matrices
-	for (int i = 0; i < image.rows; ++i) 
+	for (int x = 0; x < width; ++x)
 	{
-		for (int j = 0; j < image.cols; ++j) 
+		for (int y = 0; y < height; ++y)
 		{
-			if (i == 0)
-				distTo[i][j] = 0;
+			if (x == 0)
+				distTo[x][y] = 0;
 			else			
-				distTo[i][j] = numeric_limits<unsigned int>::max();
+				distTo[x][y] = numeric_limits<unsigned int>::max();
 
-			edgeTo[i][j] = 0;
+			edgeTo[x][y] = 0;
 		}
 	}
 
-	for (int row = 0; row < image.rows - 1; ++row)
+	for (int x = 0; x < width - 1; ++x)
 	{
-		for (int col = 0; col < image.cols; ++col)
+		for (int y = 0; y < height; ++y)
 		{
 
-			//Bottom-left
-			if (col != 0)
+			//Left
+			if (y != 0)
 			{
-				if (distTo[row + 1][col - 1] > distTo[row][col] + GetEnergy(row + 1, col - 1))
+				if (distTo[x + 1][y - 1] > distTo[x][y] + GetEnergy(x + 1, y - 1))
 				{
-					distTo[row + 1][col - 1] = distTo[row][col] + GetEnergy(row + 1, col - 1);
-					edgeTo[row + 1][col - 1] = 1;
+					distTo[x + 1][y - 1] = distTo[x][y] + GetEnergy(x + 1, y - 1);
+					edgeTo[x + 1][y - 1] = 1;
 				}
 			}
 
 			//Below
-			if (distTo[row + 1][col] > distTo[row][col] + GetEnergy(row + 1, col))
+			if (distTo[x + 1][y] > distTo[x][y] + GetEnergy(x + 1, y))
 			{
-				distTo[row + 1][col] = distTo[row][col] + GetEnergy(row + 1, col);
-				edgeTo[row + 1][col] = 0;
+				distTo[x + 1][y] = distTo[x][y] + GetEnergy(x + 1, y);
+				edgeTo[x + 1][y] = 0;
 			}
 
-			//Bottom-right
-			if (col != image.cols - 1)
+			//Right
+			if (y != height - 1)
 			{
-				if (distTo[row + 1][col + 1] > distTo[row][col] + GetEnergy(row + 1, col + 1))
+				if (distTo[x + 1][y + 1] > distTo[x][y] + GetEnergy(x + 1, y + 1))
 				{
-					distTo[row + 1][col + 1] = distTo[row][col] + GetEnergy(row + 1, col + 1);
-					edgeTo[row + 1][col + 1] = -1;
+					distTo[x + 1][y + 1] = distTo[x][y] + GetEnergy(x + 1, y + 1);
+					edgeTo[x + 1][y + 1] = -1;
 				}
 			}
 		}
 	}
 
 	//Find the bottom of the min-path
-	unsigned int min_index = 0, min = distTo[image.rows - 1][0];
-	for (int i = 1; i < image.cols; ++i)
+	unsigned int min_index = 0;
+	unsigned int min = distTo[width - 1][0];
+
+	for (int y = 1; y < height; ++y)
 	{
-		if (distTo[image.rows - 1][i] < min)
+		if (distTo[width - 1][y] < min)
 		{
-			min_index = i;
-			min = distTo[image.rows - 1][i];
+			min_index = y;
+			min = distTo[width - 1][y];
+
+			cout << min_index << " " << min << endl;
 		}
 	}
 
 	//Retrace the min-path and update the 'seam'
-	seam[image.rows - 1] = min_index;
-	for (int i = image.rows - 1; i > 0; --i)
+	seam[width - 1] = min_index;
+	for (int i = width- 1; i > 0; --i)
 	{
 		seam[i - 1] = seam[i] + edgeTo[i][seam[i]];
 	}
 
 	//Insert the seam in the vector
 	vector<int> s;
-	for (int i = 0; i < r; i++)
+	for (int i = 0; i < width; i++)
 		s.push_back(seam[i]);
 
 
 	//Cleanup
 	delete[] seam;
 
-	for (int i = 0; i < r; i++)
+	for (int i = 0; i < width; i++)
 		delete distTo[i];
 	delete[] distTo;
 
-	for (int i = 0; i < r; i++)
+	for (int i = 0; i < width; i++)
 		delete edgeTo[i];
 	delete[] edgeTo;
 
@@ -224,12 +228,11 @@ vector<int> SeamCarver::FindHorizontalSeam()
 {
 	vector<int> seam(image.cols);
 
-	//Transpose the matrices and find the vertical seam
+	//Transpose and find vertical seam
 	transpose(image, image);
 	transpose(energy, energy);
 	seam = FindVerticalSeam();
 
-	//Transpose back
 	transpose(image, image);
 	transpose(energy, energy);
 	return seam;
@@ -237,12 +240,11 @@ vector<int> SeamCarver::FindHorizontalSeam()
 
 void SeamCarver::RemoveHorizontalSeam(vector<int> seam)
 {
-	//Transpose the matrices and remove the vertical seam
+	//Transpose and remove vertical seam
 	transpose(image, image);
 	transpose(energy, energy);
 	RemoveVerticalSeam(seam);
 
-	//Transpose back
 	transpose(image, image);
 	transpose(energy, energy);
 }

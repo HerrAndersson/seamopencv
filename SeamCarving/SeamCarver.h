@@ -22,8 +22,8 @@ public:
 	void ShowImage();
 	void ShowEnergy();
 
-	void SaveImage();
-	void SaveEnergy();
+	void SaveImage(string filename);
+	void SaveEnergy(string filename);
 
 	Mat_<Vec3b> GetImage();
 	unsigned int GetEnergy(unsigned int row, unsigned int col);
