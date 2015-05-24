@@ -82,6 +82,12 @@ void SeamCarver::ComputeFullEnergy()
 
 	energy.create(image.rows, image.cols, CV_32S);
 
+
+
+	//FIXA SÅ ATT BOUNDARY INTE BLIR IGNORERADE!
+
+
+
 	//Scan through the image and update the energy values. Ignore boundary pixels.
 	for (int i = 1; i < image.rows - 1; ++i)
 	{
@@ -107,6 +113,11 @@ void SeamCarver::ComputeFullEnergy()
 			energy.at<int>(i, j) = val;
 		}
 	}
+
+	//energy.at<int>(0, 0) = energy.at<int>(1, 1);
+	//energy.at<int>(image.cols - 1, 0) = energy.at<int>(image.cols - 2, 1);
+	//energy.at<int>(0, image.rows - 1) = energy.at<int>(1, image.rows - 2);
+	//energy.at<int>(image.cols - 1, image.rows - 1) = energy.at<int>(image.cols - 2, image.rows - 2);
 }
 
 vector<int> SeamCarver::FindVerticalSeam()
